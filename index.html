@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Hub with Quotes & Videos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="data.js"></script>
+    <style>
+        /* --- Card & Animation Base --- */
+        .is-flipped { transform: rotateY(180deg); }
+        .card { perspective: 1000px; cursor: pointer; will-change: transform; }
+        .quote-card { height: 260px; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.7s; transform-style: preserve-3d; will-change: transform; }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); display: flex; flex-direction: column; justify-content: space-between; padding: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .card-back { transform: rotateY(180deg); justify-content: center; }
+        .quote-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        .quote-card .tags-container { position: absolute; top: 0.75rem; right: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: flex-end; max-width: 80%; }
+        .video-card .tags-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+        /* --- Layout & Theme --- */
+        body {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253, 100%, 70%, 0.3) 0px, transparent 50%),
+                radial-gradient(at 80% 100%, hsla(200, 100%, 60%, 0.25) 0px, transparent 50%),
+                radial-gradient(at 20% 100%, hsla(330, 100%, 80%, 0.2) 0px, transparent 50%);
+        }
+        h1 { color: rgba(255, 255, 255, 0.9); text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+        .hidden { display: none; }
+
+        /* --- Sidebar --- */
+        .nav-item { display: block; width: 100%; text-align: left; padding: 1rem; color: rgba(255, 255, 255, 0.7); transition: background-color 0.2s, color 0.2s; }
+        .nav-item:hover { background-color: rgba(255, 255, 255, 0.2); color: white; }
+        .nav-item.active { background-color: rgba(255, 255, 255, 0.2); color: white; }
+
+        /* --- Custom Scrollbar Styling --- */
+        main { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.3) transparent; }
+        main::-webkit-scrollbar { width: 12px; }
+        main::-webkit-scrollbar-track { background: transparent; }
+        main::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 20px; border: 3px solid transparent; background-clip: content-box; }
+        main::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.4); }
+
+        /* --- Sticky Header Scroll Effect --- */
+        .page-header { transition: background-color 0.3s ease-in-out; }
+        .page-header.scrolled { background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="flex h-screen font-sans">
+
+    <nav id="sidebar" class="fixed top-0 left-0 h-full w-[250px] flex flex-col flex-shrink-0 bg-white/10 backdrop-blur-lg border-r border-white/18 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 z-30 pt-20 px-4 pb-4 md:p-4">
+        <div class="h-[calc(100%-44px)]">
+            <h2 class="text-xl font-bold text-white mb-4 px-2">Menu</h2>
+            <div class="flex flex-col justify-between h-full">
+                <div class="flex flex-col gap-2">
+                    <button class="nav-item rounded-md" data-page="quotes">Quotes</button>
+                    <button class="nav-item rounded-md" data-page="videos">Video Learning</button>
+                </div>
+                <button class="nav-item rounded-md" data-page="about">About</button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-20 hidden"></div>
+    
+    <main class="flex-grow overflow-y-auto">
+        <button id="hamburger-btn" class="md:hidden fixed top-6 left-6 z-40 p-2 rounded-md bg-white/10 border border-white/18 backdrop-blur-md">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+
+        <section id="quotes-page">
+            <div class="page-header sticky top-0 z-10 py-6">
+                <h1 class="text-4xl font-bold text-center mb-4">Book Quotes</h1>
+                <div class="flex justify-center mb-4"><input type="text" id="quotes-search-input" placeholder="Search quotes, books, or authors..." class="w-full max-w-md p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-gray-400" aria-label="Search quotes"></div>
+                <div id="quotes-filter-container" class="flex flex-wrap justify-center gap-3"></div>
+                <div id="quotes-dropdown-container" class="flex flex-wrap justify-center gap-4 mt-4">
+                    <select id="book-filter" class="p-2 pr-10 rounded-lg bg-white/10 text-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50"></select>
+                    <select id="author-filter" class="p-2 pr-10 rounded-lg bg-white/10 text-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50"></select>
+                </div>
+            </div>
+            <div id="quotes-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-8"></div>
+        </section>
+
+        <section id="videos-page" class="hidden">
+            <div class="page-header sticky top-0 z-10 py-6">
+                <h1 class="text-4xl font-bold text-center mb-4">Video Learning</h1>
+                <div id="videos-filter-container" class="flex flex-wrap justify-center gap-3"></div>
+            </div>
+            <div id="videos-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-8"></div>
+        </section>
+
+        <section id="about-page" class="hidden mx-6">
+             <div class="max-w-2xl mx-auto mt-24 p-8 bg-white/10 rounded-lg shadow-lg border border-white/18 backdrop-blur-lg">
+                <h1 class="text-4xl font-bold text-center mb-4">About This Hub</h1>
+                <p class="text-white/80 text-center leading-relaxed">
+                    This is a single-file application built to demonstrate modern web UI concepts. It's crafted entirely within one HTML file, using the Tailwind CSS CDN for styling and vanilla JavaScript for all its interactivity, including state management, filtering, and dynamic rendering.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <template id="quote-card-template">
+        <div class="card quote-card transition-transform duration-300 hover:scale-105">
+            <div class="card-inner">
+                <div class="card-face card-front bg-white/10 text-gray-100"> 
+                    <div class="tags-container"></div>
+                    <div class="quote-container"><blockquote class="text-lg italic w-full text-center"><p class="quote-text"></p></blockquote></div>
+                    <div class="comments-section hidden mt-4 border-t border-white/20 pt-2"><p class="comments-text text-xs text-gray-400 italic"></p></div>
+                    <button class="copy-btn absolute top-2 left-2 p-2 rounded-full hover:bg-white/20 transition-colors" title="Copy to clipboard">
+                        <svg class="copy-icon h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <svg class="check-icon h-5 w-5 text-green-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-face card-back bg-white/10 items-center text-center"> 
+                    <a class="book-title font-bold text-lg text-white hover:underline" target="_blank" rel="noopener noreferrer"></a>
+                    <a class="author-name text-base text-gray-300 hover:underline" target="_blank" rel="noopener noreferrer"></a>
+                    <p class="page-number mt-4 text-sm bg-white/20 text-white px-2 py-1 rounded border border-white/30"></p>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="video-card-template">
+        <div class="video-card bg-white/10 rounded-lg shadow-lg overflow-hidden border border-white/18 transition-transform duration-300 hover:scale-105">
+            <div class="aspect-w-16 aspect-h-9 h-[250px]"><iframe class="video-embed w-full h-full" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+            <div class="p-6">
+                <h3 class="video-title text-white font-bold"></h3>
+                <div class="tags-container mt-2 flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const mainContent = document.querySelector('main');
+            const pageHeaders = document.querySelectorAll('.page-header');
+            const quotesSearchInput = document.getElementById('quotes-search-input');
+            const bookFilter = document.getElementById('book-filter');
+            const authorFilter = document.getElementById('author-filter');
+            
+            const pages = { quotes: document.getElementById('quotes-page'), videos: document.getElementById('videos-page'), about: document.getElementById('about-page') };
+            const containers = { quotes: document.getElementById('quotes-card-container'), videos: document.getElementById('videos-card-container') };
+            const filterContainers = { quotes: document.getElementById('quotes-filter-container'), videos: document.getElementById('videos-filter-container') };
+            const templates = { quotes: document.getElementById('quote-card-template'), videos: document.getElementById('video-card-template') };
+            const dataSources = { quotes: quoteData, videos: videoData };
+
+            let state = {
+                currentPage: 'quotes',
+                filters: {
+                    quotes: { tag: 'All', book: 'All Books', author: 'All Authors' },
+                    videos: { tag: 'All' }
+                },
+                searchTerm: ''
+            };
+
+            const adjustFontSize = (element) => {
+                const container = element.parentElement; 
+                element.style.fontSize = ''; 
+                let currentSize = parseFloat(window.getComputedStyle(element).fontSize);
+                while (container.scrollHeight > container.clientHeight && currentSize > 10) {
+                    currentSize--; 
+                    element.style.fontSize = `${currentSize}px`;
+                }
+            };
+
+            const render = () => {
+                Object.keys(pages).forEach(pageKey => pages[pageKey].classList.toggle('hidden', pageKey !== state.currentPage));
+                sidebar.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.page === state.currentPage));
+                
+                if (state.currentPage === 'quotes' || state.currentPage === 'videos') {
+                    const currentData = dataSources[state.currentPage];
+                    const currentContainer = containers[state.currentPage];
+                    const currentTemplate = templates[state.currentPage];
+                    const currentFilters = state.filters[state.currentPage];
+                    
+                    let filteredData = [...currentData];
+
+                    if (state.currentPage === 'quotes') {
+                        const allTags = new Set();
+                        quoteData.forEach(item => item.tags.forEach(tag => allTags.add(tag)));
+                        const tags = ['All', ...Array.from(allTags).sort()];
+                        const books = ['All Books', ...new Set(quoteData.map(item => item.book))];
+                        const authors = ['All Authors', ...new Set(quoteData.map(item => item.author))];
+
+                        filterContainers.quotes.innerHTML = '';
+                        tags.forEach(tag => {
+                            const button = document.createElement('button');
+                            const baseClasses = ['px-4', 'py-2', 'text-sm', 'font-medium', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'border', 'border-white/20', '[backdrop-filter:blur(10px)]', 'transition-colors'];
+                            const defaultClasses = ['text-white/70', 'bg-white/10', 'hover:bg-white/20'];
+                            const activeButtonClasses = ['text-white', 'bg-white/20', 'border-white/30'];
+                            button.classList.add(...baseClasses, ...(tag === currentFilters.tag ? activeButtonClasses : defaultClasses));
+                            button.textContent = tag; button.dataset.tag = tag;
+                            filterContainers.quotes.appendChild(button);
+                        });
+                        bookFilter.innerHTML = books.map(book => `<option value="${book}" ${book === currentFilters.book ? 'selected' : ''}>${book}</option>`).join('');
+                        authorFilter.innerHTML = authors.map(author => `<option value="${author}" ${author === currentFilters.author ? 'selected' : ''}>${author}</option>`).join('');
+                        
+                        const searchTerm = state.searchTerm.toLowerCase();
+                        if (searchTerm) filteredData = filteredData.filter(item => item.quote.toLowerCase().includes(searchTerm) || item.book.toLowerCase().includes(searchTerm) || item.author.toLowerCase().includes(searchTerm));
+                        if (currentFilters.tag !== 'All') filteredData = filteredData.filter(item => item.tags.includes(currentFilters.tag));
+                        if (currentFilters.book !== 'All Books') filteredData = filteredData.filter(item => item.book === currentFilters.book);
+                        if (currentFilters.author !== 'All Authors') filteredData = filteredData.filter(item => item.author === currentFilters.author);
+                    } else { // videos
+                        const allTags = new Set();
+                        videoData.forEach(item => item.tags.forEach(tag => allTags.add(tag)));
+                        const tags = ['All', ...Array.from(allTags).sort()];
+                        filterContainers.videos.innerHTML = '';
+                        tags.forEach(tag => {
+                            const button = document.createElement('button');
+                            const baseClasses = ['px-4', 'py-2', 'text-sm', 'font-medium', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'border', 'border-white/20', '[backdrop-filter:blur(10px)]', 'transition-colors'];
+                            const defaultClasses = ['text-white/70', 'bg-white/10', 'hover:bg-white/20'];
+                            const activeButtonClasses = ['text-white', 'bg-white/20', 'border-white/30'];
+                            button.classList.add(...baseClasses, ...(tag === currentFilters.tag ? activeButtonClasses : defaultClasses));
+                            button.textContent = tag; button.dataset.tag = tag;
+                            filterContainers.videos.appendChild(button);
+                        });
+                        if (currentFilters.tag !== 'All') filteredData = filteredData.filter(item => item.tags.includes(currentFilters.tag));
+                    }
+
+                    currentContainer.innerHTML = '';
+                    filteredData.forEach(item => {
+                        const cardClone = currentTemplate.content.cloneNode(true);
+                        if (state.currentPage === 'quotes') {
+                            const cardInner = cardClone.querySelector('.card-inner');
+                            const tagsContainer = cardClone.querySelector('.tags-container');
+                            item.tags.forEach(tag => {
+                                const tagSpan = document.createElement('span');
+                                tagSpan.className = 'bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full border border-white/30';
+                                tagSpan.textContent = tag;
+                                tagsContainer.appendChild(tagSpan);
+                            });
+                            cardClone.querySelector('.quote-text').textContent = `"${item.quote}"`;
+                            const bookLink = cardClone.querySelector('.book-title');
+                            const authorLink = cardClone.querySelector('.author-name');
+                            bookLink.textContent = item.book; authorLink.textContent = `by ${item.author}`;
+                            bookLink.href = `https://www.amazon.in/s?k=${encodeURIComponent(item.book)}`;
+                            authorLink.href = `https://www.google.com/search?q=${encodeURIComponent(item.author)}`;
+                            cardClone.querySelector('.page-number').textContent = `Page ${item.page}`;
+                            
+                            const commentsSection = cardClone.querySelector('.comments-section');
+                            if (item.comments && item.comments.trim() !== '') {
+                                commentsSection.querySelector('.comments-text').textContent = item.comments;
+                                commentsSection.classList.remove('hidden');
+                            }
+                            adjustFontSize(cardClone.querySelector('.quote-text'));
+                            cardClone.querySelector('.card').addEventListener('click', () => cardInner.classList.toggle('is-flipped'));
+                            bookLink.addEventListener('click', (e) => e.stopPropagation());
+                            authorLink.addEventListener('click', (e) => e.stopPropagation());
+
+                            // NEW: Copy button logic
+                            const copyBtn = cardClone.querySelector('.copy-btn');
+                            copyBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                let formattedText = `"${item.quote}"\n— ${item.author}, from '${item.book}' (Page ${item.page})`;
+                                if (item.comments && item.comments.trim() !== '') {
+                                    formattedText += `\n\nMy thoughts:\n${item.comments}`;
+                                }
+                                navigator.clipboard.writeText(formattedText).then(() => {
+                                    const copyIcon = copyBtn.querySelector('.copy-icon');
+                                    const checkIcon = copyBtn.querySelector('.check-icon');
+                                    copyIcon.classList.add('hidden');
+                                    checkIcon.classList.remove('hidden');
+                                    setTimeout(() => {
+                                        copyIcon.classList.remove('hidden');
+                                        checkIcon.classList.add('hidden');
+                                    }, 2000);
+                                });
+                            });
+                        } else if (state.currentPage === 'videos') {
+                            cardClone.querySelector('.video-embed').src = `https://www.youtube.com/embed/${item.videoId}`;
+                            cardClone.querySelector('.video-title').textContent = item.title;
+                            const tagsContainer = cardClone.querySelector('.tags-container');
+                            item.tags.forEach(tag => {
+                                const tagSpan = document.createElement('span');
+                                tagSpan.className = 'inline-block bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full border border-white/30';
+                                tagSpan.textContent = tag;
+                                tagsContainer.appendChild(tagSpan);
+                            });
+                        }
+                        currentContainer.appendChild(cardClone);
+                    });
+                }
+            };
+
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarBackdrop.classList.toggle('hidden');
+            };
+
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            sidebarBackdrop.addEventListener('click', toggleSidebar);
+
+            sidebar.addEventListener('click', (e) => {
+                if (e.target.matches('.nav-item')) {
+                    state.currentPage = e.target.dataset.page;
+                    mainContent.scrollTop = 0;
+                    if (window.innerWidth < 768) toggleSidebar();
+                    if (quotesSearchInput) { quotesSearchInput.value = ''; state.searchTerm = ''; }
+                    render();
+                }
+            });
+
+            quotesSearchInput?.addEventListener('input', (e) => { state.searchTerm = e.target.value; render(); });
+            bookFilter?.addEventListener('change', (e) => { state.filters.quotes.book = e.target.value; render(); });
+            authorFilter?.addEventListener('change', (e) => { state.filters.quotes.author = e.target.value; render(); });
+
+            filterContainers.quotes?.addEventListener('click', (e) => { if (e.target.matches('button')) { state.filters.quotes.tag = e.target.dataset.tag; render(); } });
+            filterContainers.videos?.addEventListener('click', (e) => { if (e.target.matches('button')) { state.filters.videos.tag = e.target.dataset.tag; render(); } });
+
+            mainContent.addEventListener('scroll', () => { pageHeaders.forEach(header => header.classList.toggle('scrolled', mainContent.scrollTop > 10)); });
+
+            render();
+        });
+    </script>
+</body>
+</html>

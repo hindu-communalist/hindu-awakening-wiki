@@ -10,20 +10,6 @@ const quoteData = [
 ];
 
 const videoData = [
-  { title: "A Tour of the Universe", videoId: "p_dDeaW_a5c", tags: ["Science", "Space"] },
-  {
-    title: "The Rise and Fall of the Roman Empire",
-    videoId: "o_R-K1A8s_A",
-    tags: ["History", "Culture"],
-  },
-  {
-    title: "The Pomodoro Technique for Productivity",
-    videoId: "mNBmG24djoY",
-    tags: ["Productivity", "Career"],
-  },
-  {
-    title: "Introduction to Neural Networks",
-    videoId: "aircAruvnKk",
-    tags: ["Science", "Technology"],
-  },
+  { title: "रायगड दर्शन (भाग २) - इतिहासतज्ञ श्री. अप्पा परबांसोबत", videoId: "KXZZrolKsD0", tags: ["History"] },
+  { title: "History: The truth and lies| Gajanan Mehendale| इतिहासातील सत्य व असत्य| गजानन मेहेंदळे", videoId: "GqhkOvysMm8", tags: ["History", "Distortions"] }
 ];

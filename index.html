@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Hub with Quotes & Videos</title>
+    <title>Jay Shree Ram</title>
+    <link rel="icon" href="flag.svg" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="data.js"></script>
     <style>
         /* --- Card & Animation Base --- */
         .is-flipped { transform: rotateY(180deg); }
         .card { perspective: 1000px; cursor: pointer; will-change: transform; }
-        .quote-card { height: 260px; }
+        .quote-card { min-height: 260px; } 
         .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.7s; transform-style: preserve-3d; will-change: transform; }
         .card-face {
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem;
+            backface-visibility: hidden; border-radius: 0.75rem;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); display: flex; flex-direction: column; justify-content: space-between; padding: 1.25rem;
             border: 1px solid rgba(255, 255, 255, 0.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            min-height: 260px;
         }
-        .card-back { transform: rotateY(180deg); justify-content: center; }
+        .card-front { position: relative; } /* Let the front face define the flow and height */
+        .card-back { position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: rotateY(180deg); justify-content: center; }
         .quote-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-        .quote-card .tags-container { position: absolute; top: 0.75rem; right: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: flex-end; max-width: 80%; }
+        .quote-card .tags-container { display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: flex-end; }
         .video-card .tags-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
         /* --- Layout & Theme --- */
@@ -51,53 +54,92 @@
     </style>
 </head>
 <body class="flex h-screen font-sans">
-
-    <nav id="sidebar" class="fixed top-0 left-0 h-full w-[250px] flex flex-col flex-shrink-0 bg-white/10 backdrop-blur-lg border-r border-white/18 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 z-30 pt-20 px-4 pb-4 md:p-4">
+    <nav id="sidebar" class="fixed top-0 left-0 h-full w-[250px] flex flex-col flex-shrink-0 bg-white/10 backdrop-blur-lg border-r border-white/18 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 z-50 pt-20 px-4 pb-4 md:p-4">
         <div class="h-[calc(100%-44px)]">
-            <h2 class="text-xl font-bold text-white mb-4 px-2">Menu</h2>
+            <div class="w-10 h-10 mb-4">
+                <img src="flag.svg" alt="flag">
+            </div>
             <div class="flex flex-col justify-between h-full">
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 mt-3">
                     <button class="nav-item rounded-md" data-page="quotes">Quotes</button>
                     <button class="nav-item rounded-md" data-page="videos">Video Learning</button>
                 </div>
-                <button class="nav-item rounded-md" data-page="about">About</button>
+                <button class="nav-item rounded-md mb-4" data-page="about">About</button>
             </div>
         </div>
     </nav>
-
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-20 hidden"></div>
     
+    <div id="filter-slideover" class="fixed top-0 right-0 h-full w-[300px] bg-slate-800/80 backdrop-blur-lg z-40 transform translate-x-full transition-transform duration-300 ease-in-out p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-white">Filters</h2>
+            <button id="close-filter-btn" class="p-2 rounded-full hover:bg-white/20">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <div class="space-y-6">
+            <div id="slideover-filters-quotes">
+                <div>
+                    <h3 class="text-sm font-semibold text-white/70 mb-2">Tags</h3>
+                    <div id="mobile-quotes-filter-container" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-white/70 mb-2">Book</h3>
+                    <select id="mobile-book-filter" class="w-full p-2 pr-10 rounded-lg bg-white/10 text-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50"></select>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-white/70 mb-2">Author</h3>
+                    <select id="mobile-author-filter" class="w-full p-2 pr-10 rounded-lg bg-white/10 text-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50"></select>
+                </div>
+            </div>
+            <div id="slideover-filters-videos" class="hidden">
+                 <div>
+                    <h3 class="text-sm font-semibold text-white/70 mb-2">Tags</h3>
+                    <div id="mobile-videos-filter-container" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="filter-backdrop" class="fixed inset-0 bg-black/50 z-30 hidden"></div>
+
     <main class="flex-grow overflow-y-auto">
         <button id="hamburger-btn" class="md:hidden fixed top-6 left-6 z-40 p-2 rounded-md bg-white/10 border border-white/18 backdrop-blur-md">
             <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
         </button>
 
         <section id="quotes-page">
-            <div class="page-header sticky top-0 z-10 py-6">
+            <div class="page-header sticky top-0 z-10 py-6 px-8">
                 <h1 class="text-4xl font-bold text-center mb-4">Book Quotes</h1>
-                <div class="flex justify-center mb-4"><input type="text" id="quotes-search-input" placeholder="Search quotes, books, or authors..." class="w-full max-w-md p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-gray-400" aria-label="Search quotes"></div>
-                <div id="quotes-filter-container" class="flex flex-wrap justify-center gap-3"></div>
-                <div id="quotes-dropdown-container" class="flex flex-wrap justify-center gap-4 mt-4">
-                    <select id="book-filter" class="p-2 pr-10 rounded-lg bg-white/10 text-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50"></select>
-                    <select id="author-filter" class="p-2 pr-10 rounded-lg bg-white/10 text-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50"></select>
+                <div class="flex justify-center items-center gap-4 mb-4">
+                    <input type="text" id="quotes-search-input" placeholder="Search quotes, books, or authors..." class="w-full max-w-md p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder-gray-400" aria-label="Search quotes">
+                    <button id="open-filter-btn-quotes" class="p-3 rounded-lg bg-white/10 border border-white/20">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                    </button>
+                    <button id="clear-filters-btn-quotes" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-white text-sm">Clear</button>
                 </div>
             </div>
-            <div id="quotes-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-8"></div>
+            <div id="quotes-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-8 items-start"></div>
         </section>
 
         <section id="videos-page" class="hidden">
-            <div class="page-header sticky top-0 z-10 py-6">
+             <div class="page-header sticky top-0 z-10 py-6 px-8">
                 <h1 class="text-4xl font-bold text-center mb-4">Video Learning</h1>
-                <div id="videos-filter-container" class="flex flex-wrap justify-center gap-3"></div>
+                <div class="flex justify-center items-center gap-4 mb-4">
+                    <span class="w-full max-w-md"></span> 
+                    <button id="open-filter-btn-videos" class="p-3 rounded-lg bg-white/10 border border-white/20">
+                         <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                    </button>
+                    <button id="clear-filters-btn-videos" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-white text-sm">Clear</button>
+                </div>
             </div>
             <div id="videos-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-8"></div>
         </section>
 
-        <section id="about-page" class="hidden mx-6">
-             <div class="max-w-2xl mx-auto mt-24 p-8 bg-white/10 rounded-lg shadow-lg border border-white/18 backdrop-blur-lg">
+        <section id="about-page" class="hidden p-8">
+             <div class="max-w-2xl mx-auto mt-16 p-8 bg-white/10 rounded-lg shadow-lg border border-white/18 backdrop-blur-lg">
                 <h1 class="text-4xl font-bold text-center mb-4">About This Hub</h1>
                 <p class="text-white/80 text-center leading-relaxed">
-                    This is a single-file application built to demonstrate modern web UI concepts. It's crafted entirely within one HTML file, using the Tailwind CSS CDN for styling and vanilla JavaScript for all its interactivity, including state management, filtering, and dynamic rendering.
+                    This is a single-file application built to demonstrate modern web UI concepts. It's crafted entirely within one HTML file, using the Tailwind CSS CDN for styling and vanilla JavaScript for all its interactivity.
                 </p>
             </div>
         </section>
@@ -106,18 +148,16 @@
     <template id="quote-card-template">
         <div class="card quote-card transition-transform duration-300 hover:scale-105">
             <div class="card-inner">
-                <div class="card-face card-front bg-white/10 text-gray-100"> 
-                    <div class="tags-container"></div>
+                <div class="card-face card-front bg-white/10 text-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <button class="copy-btn p-2 rounded-full hover:bg-white/20 transition-colors" title="Copy to clipboard">
+                            <svg class="copy-icon h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg class="check-icon h-5 w-5 text-green-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </button>
+                        <div class="tags-container"></div>
+                    </div>
                     <div class="quote-container"><blockquote class="text-lg italic w-full text-center"><p class="quote-text"></p></blockquote></div>
                     <div class="comments-section hidden mt-4 border-t border-white/20 pt-2"><p class="comments-text text-xs text-gray-400 italic"></p></div>
-                    <button class="copy-btn absolute top-2 left-2 p-2 rounded-full hover:bg-white/20 transition-colors" title="Copy to clipboard">
-                        <svg class="copy-icon h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <svg class="check-icon h-5 w-5 text-green-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </button>
                 </div>
                 <div class="card-face card-back bg-white/10 items-center text-center"> 
                     <a class="book-title font-bold text-lg text-white hover:underline" target="_blank" rel="noopener noreferrer"></a>
@@ -140,50 +180,72 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
+            // ... (rest of the variable declarations are the same)
             const sidebarBackdrop = document.getElementById('sidebar-backdrop');
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const mainContent = document.querySelector('main');
             const pageHeaders = document.querySelectorAll('.page-header');
             const quotesSearchInput = document.getElementById('quotes-search-input');
-            const bookFilter = document.getElementById('book-filter');
-            const authorFilter = document.getElementById('author-filter');
             
+            const filterSlideover = document.getElementById('filter-slideover');
+            const filterBackdrop = document.getElementById('filter-backdrop');
+            const closeFilterBtn = document.getElementById('close-filter-btn');
+            
+            const openFilterBtnQuotes = document.getElementById('open-filter-btn-quotes');
+            const openFilterBtnVideos = document.getElementById('open-filter-btn-videos');
+            const clearFiltersBtnQuotes = document.getElementById('clear-filters-btn-quotes');
+            const clearFiltersBtnVideos = document.getElementById('clear-filters-btn-videos');
+            
+            const slideoverFilters = {
+                quotes: document.getElementById('slideover-filters-quotes'),
+                videos: document.getElementById('slideover-filters-videos')
+            };
+
             const pages = { quotes: document.getElementById('quotes-page'), videos: document.getElementById('videos-page'), about: document.getElementById('about-page') };
             const containers = { quotes: document.getElementById('quotes-card-container'), videos: document.getElementById('videos-card-container') };
-            const filterContainers = { quotes: document.getElementById('quotes-filter-container'), videos: document.getElementById('videos-filter-container') };
+            
+            const filterElements = {
+                tags: document.getElementById('mobile-quotes-filter-container'),
+                book: document.getElementById('mobile-book-filter'),
+                author: document.getElementById('mobile-author-filter'),
+                videoTags: document.getElementById('mobile-videos-filter-container')
+            };
+
             const templates = { quotes: document.getElementById('quote-card-template'), videos: document.getElementById('video-card-template') };
             const dataSources = { quotes: quoteData, videos: videoData };
 
             let state = {
                 currentPage: 'quotes',
                 filters: {
-                    quotes: { tag: 'All', book: 'All Books', author: 'All Authors' },
-                    videos: { tag: 'All' }
+                    quotes: { tag: ['All'], book: 'All Books', author: 'All Authors' },
+                    videos: { tag: ['All'] }
                 },
                 searchTerm: ''
             };
-
-            const adjustFontSize = (element) => {
-                const container = element.parentElement; 
-                element.style.fontSize = ''; 
-                let currentSize = parseFloat(window.getComputedStyle(element).fontSize);
-                while (container.scrollHeight > container.clientHeight && currentSize > 10) {
-                    currentSize--; 
-                    element.style.fontSize = `${currentSize}px`;
-                }
-            };
-
+            
             const render = () => {
+                // ... (render logic up to button styling is the same)
                 Object.keys(pages).forEach(pageKey => pages[pageKey].classList.toggle('hidden', pageKey !== state.currentPage));
                 sidebar.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.page === state.currentPage));
                 
+                const quoteFiltersActive = state.searchTerm || !state.filters.quotes.tag.includes('All') || state.filters.quotes.book !== 'All Books' || state.filters.quotes.author !== 'All Authors';
+                clearFiltersBtnQuotes.classList.toggle('hidden', !quoteFiltersActive);
+                
+                const videoFiltersActive = !state.filters.videos.tag.includes('All');
+                clearFiltersBtnVideos.classList.toggle('hidden', !videoFiltersActive);
+
                 if (state.currentPage === 'quotes' || state.currentPage === 'videos') {
                     const currentData = dataSources[state.currentPage];
                     const currentContainer = containers[state.currentPage];
                     const currentTemplate = templates[state.currentPage];
                     const currentFilters = state.filters[state.currentPage];
-                    
                     let filteredData = [...currentData];
+
+                    // Define button styles once
+                    const baseButtonClasses = ['px-4', 'py-2', 'text-sm', 'font-medium', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'border', 'border-white/20', 'transition-colors'];
+                    const defaultButtonClasses = ['text-white/70', 'bg-white/10', 'hover:bg-white/20'];
+                    // UPDATED: High-contrast active button style
+                    const activeButtonClasses = ['text-white', 'font-semibold', 'bg-indigo-500/50', 'border-indigo-400'];
 
                     if (state.currentPage === 'quotes') {
                         const allTags = new Set();
@@ -192,45 +254,48 @@
                         const books = ['All Books', ...new Set(quoteData.map(item => item.book))];
                         const authors = ['All Authors', ...new Set(quoteData.map(item => item.author))];
 
-                        filterContainers.quotes.innerHTML = '';
-                        tags.forEach(tag => {
-                            const button = document.createElement('button');
-                            const baseClasses = ['px-4', 'py-2', 'text-sm', 'font-medium', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'border', 'border-white/20', '[backdrop-filter:blur(10px)]', 'transition-colors'];
-                            const defaultClasses = ['text-white/70', 'bg-white/10', 'hover:bg-white/20'];
-                            const activeButtonClasses = ['text-white', 'bg-white/20', 'border-white/30'];
-                            button.classList.add(...baseClasses, ...(tag === currentFilters.tag ? activeButtonClasses : defaultClasses));
-                            button.textContent = tag; button.dataset.tag = tag;
-                            filterContainers.quotes.appendChild(button);
-                        });
-                        bookFilter.innerHTML = books.map(book => `<option value="${book}" ${book === currentFilters.book ? 'selected' : ''}>${book}</option>`).join('');
-                        authorFilter.innerHTML = authors.map(author => `<option value="${author}" ${author === currentFilters.author ? 'selected' : ''}>${author}</option>`).join('');
+                        const renderTagButtons = (container) => {
+                            container.innerHTML = '';
+                            tags.forEach(tag => {
+                                const button = document.createElement('button');
+                                button.classList.add(...baseButtonClasses, ...(currentFilters.tag.includes(tag) ? activeButtonClasses : defaultButtonClasses));
+                                button.textContent = tag; button.dataset.tag = tag;
+                                container.appendChild(button);
+                            });
+                        };
+                        renderTagButtons(filterElements.tags);
+                        
+                        filterElements.book.innerHTML = books.map(book => `<option value="${book}" ${book === currentFilters.book ? 'selected' : ''}>${book}</option>`).join('');
+                        filterElements.author.innerHTML = authors.map(author => `<option value="${author}" ${author === currentFilters.author ? 'selected' : ''}>${author}</option>`).join('');
                         
                         const searchTerm = state.searchTerm.toLowerCase();
                         if (searchTerm) filteredData = filteredData.filter(item => item.quote.toLowerCase().includes(searchTerm) || item.book.toLowerCase().includes(searchTerm) || item.author.toLowerCase().includes(searchTerm));
-                        if (currentFilters.tag !== 'All') filteredData = filteredData.filter(item => item.tags.includes(currentFilters.tag));
+                        if (!currentFilters.tag.includes('All')) {
+                            filteredData = filteredData.filter(item => item.tags.some(tag => currentFilters.tag.includes(tag)));
+                        }
                         if (currentFilters.book !== 'All Books') filteredData = filteredData.filter(item => item.book === currentFilters.book);
                         if (currentFilters.author !== 'All Authors') filteredData = filteredData.filter(item => item.author === currentFilters.author);
                     } else { // videos
                         const allTags = new Set();
                         videoData.forEach(item => item.tags.forEach(tag => allTags.add(tag)));
                         const tags = ['All', ...Array.from(allTags).sort()];
-                        filterContainers.videos.innerHTML = '';
+                        filterElements.videoTags.innerHTML = '';
                         tags.forEach(tag => {
                             const button = document.createElement('button');
-                            const baseClasses = ['px-4', 'py-2', 'text-sm', 'font-medium', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'border', 'border-white/20', '[backdrop-filter:blur(10px)]', 'transition-colors'];
-                            const defaultClasses = ['text-white/70', 'bg-white/10', 'hover:bg-white/20'];
-                            const activeButtonClasses = ['text-white', 'bg-white/20', 'border-white/30'];
-                            button.classList.add(...baseClasses, ...(tag === currentFilters.tag ? activeButtonClasses : defaultClasses));
+                            button.classList.add(...baseButtonClasses, ...(currentFilters.tag.includes(tag) ? activeButtonClasses : defaultButtonClasses));
                             button.textContent = tag; button.dataset.tag = tag;
-                            filterContainers.videos.appendChild(button);
+                            filterElements.videoTags.appendChild(button);
                         });
-                        if (currentFilters.tag !== 'All') filteredData = filteredData.filter(item => item.tags.includes(currentFilters.tag));
+                        if (!currentFilters.tag.includes('All')) {
+                            filteredData = filteredData.filter(item => item.tags.some(tag => currentFilters.tag.includes(tag)));
+                        }
                     }
 
                     currentContainer.innerHTML = '';
                     filteredData.forEach(item => {
                         const cardClone = currentTemplate.content.cloneNode(true);
                         if (state.currentPage === 'quotes') {
+                           // ... same card rendering logic ...
                             const cardInner = cardClone.querySelector('.card-inner');
                             const tagsContainer = cardClone.querySelector('.tags-container');
                             item.tags.forEach(tag => {
@@ -252,12 +317,10 @@
                                 commentsSection.querySelector('.comments-text').textContent = item.comments;
                                 commentsSection.classList.remove('hidden');
                             }
-                            adjustFontSize(cardClone.querySelector('.quote-text'));
+                            
                             cardClone.querySelector('.card').addEventListener('click', () => cardInner.classList.toggle('is-flipped'));
                             bookLink.addEventListener('click', (e) => e.stopPropagation());
                             authorLink.addEventListener('click', (e) => e.stopPropagation());
-
-                            // NEW: Copy button logic
                             const copyBtn = cardClone.querySelector('.copy-btn');
                             copyBtn.addEventListener('click', (e) => {
                                 e.stopPropagation();
@@ -277,6 +340,7 @@
                                 });
                             });
                         } else if (state.currentPage === 'videos') {
+                            // ... same card rendering logic ...
                             cardClone.querySelector('.video-embed').src = `https://www.youtube.com/embed/${item.videoId}`;
                             cardClone.querySelector('.video-title').textContent = item.title;
                             const tagsContainer = cardClone.querySelector('.tags-container');
@@ -291,7 +355,8 @@
                     });
                 }
             };
-
+            
+            // ... (rest of the event listeners are the same)
             const toggleSidebar = () => {
                 sidebar.classList.toggle('-translate-x-full');
                 sidebarBackdrop.classList.toggle('hidden');
@@ -299,6 +364,33 @@
 
             hamburgerBtn.addEventListener('click', toggleSidebar);
             sidebarBackdrop.addEventListener('click', toggleSidebar);
+            
+            const openFilterPanel = (page) => {
+                Object.keys(slideoverFilters).forEach(key => slideoverFilters[key].classList.toggle('hidden', key !== page));
+                filterSlideover.classList.remove('translate-x-full');
+                filterBackdrop.classList.remove('hidden');
+            };
+
+            const closeFilterPanel = () => {
+                filterSlideover.classList.add('translate-x-full');
+                filterBackdrop.classList.add('hidden');
+            };
+
+            openFilterBtnQuotes.addEventListener('click', () => openFilterPanel('quotes'));
+            openFilterBtnVideos.addEventListener('click', () => openFilterPanel('videos'));
+            closeFilterBtn.addEventListener('click', closeFilterPanel);
+            filterBackdrop.addEventListener('click', closeFilterPanel);
+            
+            clearFiltersBtnQuotes.addEventListener('click', () => {
+                state.filters.quotes = { tag: ['All'], book: 'All Books', author: 'All Authors' };
+                state.searchTerm = '';
+                quotesSearchInput.value = '';
+                render();
+            });
+            clearFiltersBtnVideos.addEventListener('click', () => {
+                state.filters.videos = { tag: ['All'] };
+                render();
+            });
 
             sidebar.addEventListener('click', (e) => {
                 if (e.target.matches('.nav-item')) {
@@ -311,14 +403,40 @@
             });
 
             quotesSearchInput?.addEventListener('input', (e) => { state.searchTerm = e.target.value; render(); });
-            bookFilter?.addEventListener('change', (e) => { state.filters.quotes.book = e.target.value; render(); });
-            authorFilter?.addEventListener('change', (e) => { state.filters.quotes.author = e.target.value; render(); });
 
-            filterContainers.quotes?.addEventListener('click', (e) => { if (e.target.matches('button')) { state.filters.quotes.tag = e.target.dataset.tag; render(); } });
-            filterContainers.videos?.addEventListener('click', (e) => { if (e.target.matches('button')) { state.filters.videos.tag = e.target.dataset.tag; render(); } });
+            document.body.addEventListener('click', (e) => {
+                const tagButton = e.target.closest('#mobile-quotes-filter-container button, #mobile-videos-filter-container button');
+                if (tagButton) {
+                    const clickedTag = tagButton.dataset.tag;
+                    const currentTags = state.filters[state.currentPage].tag;
 
+                    if (clickedTag === 'All') {
+                        currentTags.length = 0;
+                        currentTags.push('All');
+                    } else {
+                        const allIndex = currentTags.indexOf('All');
+                        if (allIndex > -1) currentTags.splice(allIndex, 1);
+                        const tagIndex = currentTags.indexOf(clickedTag);
+                        if (tagIndex > -1) currentTags.splice(tagIndex, 1);
+                        else currentTags.push(clickedTag);
+                        if (currentTags.length === 0) currentTags.push('All');
+                    }
+                    render();
+                }
+            });
+
+            document.body.addEventListener('change', (e) => {
+                if (e.target.matches('#mobile-book-filter')) {
+                    state.filters.quotes.book = e.target.value;
+                    render();
+                }
+                if (e.target.matches('#mobile-author-filter')) {
+                    state.filters.quotes.author = e.target.value;
+                    render();
+                }
+            });
+            
             mainContent.addEventListener('scroll', () => { pageHeaders.forEach(header => header.classList.toggle('scrolled', mainContent.scrollTop > 10)); });
-
             render();
         });
     </script>

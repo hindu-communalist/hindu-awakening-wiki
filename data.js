@@ -130,6 +130,14 @@ wording in order to make it yield the meaning they require.”`,
     tags: ["Christianity", "Jesus"],
     comments: "",
   },
+{
+    quote: `It is said of Abdullah ibn MasUd (died at the age of seventy in A.H. 32), a Companion and a great Traditionist (authority for 305 traditions), that he trembled as he narrated a hadis, sweat often breaking out all over his forehead. Muslim believers are expected to read the traditions in the same spirit and with the same mind. The lapse of time helps the process. As the distance grows, the hero looms larger.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 8,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
 ];
 
 const videoData = [

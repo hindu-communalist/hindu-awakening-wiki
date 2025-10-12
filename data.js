@@ -240,4 +240,22 @@ const videoData = [
     videoId: "GqhkOvysMm8",
     tags: ["History", "Distortions"],
   },
+{
+    title:
+      "Sapiens: Red Book of Slavery || Book review || Dr. Rajiv Mishra & Neeraj Atri",
+    videoId: "JxgrmLq9pT4",
+    tags: ["Communism", "Distortions"],
+  },
+{
+    title:
+      "Islam and Muhammad for dummies - part 1 | Ancestors of Prophet | Pre-Islamic Arabia | by Neeraj Atri",
+    videoId: "MWLQu4ZqJVM",
+    tags: ["Islam", "Muhammad"],
+  },
+{
+    title:
+      "Was Muhammad a Prophet or was he deluded? || Understanding Islam || Neeraj Atri & Shankar Sharan",
+    videoId: "-qNZLHHP2Fk",
+    tags: ["Islam", "Muhammad"],
+  },
 ];

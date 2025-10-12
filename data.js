@@ -138,6 +138,38 @@ wording in order to make it yield the meaning they require.”`,
     tags: ["Islam", "Hadis", "Hadith"],
     comments: "",
   },
+{
+    quote: `The Quran provides the text, the hadis the context.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 9,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
+{
+    quote: `They show that the role of scholarship in Islam is secondary- that it is the handmaid of the Quran and the hadis, unmotivated by any seeking of its own, but capable of cleverness and even brilliance within its self- chosen role of justifying and defending.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 10,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
+{
+    quote: `Muslims wielded their swords to root out polytheism, dethrone the gods of their neighbors, and install in their place their own godling, Allah.  That they received plunder and established an empire in the process is another matter.  These were accidental terrestrial rewards for disinterested celestial labors.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 10,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
+{
+    quote: `Even in the best of circumstances, it is difficult to assimilate Muslim minorities into the national mainstream of a country.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 11,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
 ];
 
 const videoData = [

@@ -226,6 +226,38 @@ wording in order to make it yield the meaning they require.”`,
     tags: ["Islam", "Hadis", "Hadith"],
     comments: "",
   },
+{
+    quote: `Again, other moral values are given the same twist, and the universal is turned into the sectarian.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 21,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
+{
+    quote: `Men driven by orDinary temptations indulge only in petty crimes and small lapses, but committing real enormities needs the aid of an ideology, a revelation, a God- ordained mission.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 22,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
+{
+    quote: `There would come people amongst the Muslim on the Day of Resurrection with as heavy sins as a mountain, and Allah would forgive them and he would place in their stead the Jews and the Christians, Muhammad tells us (6668). This would also, incidentally, solve the problem of space in heaven: Space in paradise would be provided by Christians and Jews being thrown into Hell- Fire, the translator tells us (note 2967).`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 24,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
+{
+    quote: `Another important segment of the infernal population is made up of women.  Muhammad says, O womenfolk . . . I saw you in bulk amongst the dwellers of Hell. When a woman asks him why it should be so, Muhammad tells her: You curse too much and are ungrateful to your spouses.  I have seen none [like them] lacking in common sense and failing in religion but robbing the wisdom of the wise. The proof of the lack of common sense in them is the fact that in Allahs law promulgated by Muhammad himself, the evidence of two women is equal to one man; and the proof of their failing in religion, as he tells them, is that you spend some nights and days in which you do not offer prayer and in the month of RamzAn you do not observe fast (142).  Women sometimes abstained from voluntary fasts because the Prophet had commanded that it was more meritorious for them to do their duty by their husbands than to fast.  Aisha, the Prophets wife, did not observe some fasts due to the regards for the Apostle of Allah (2550).  But, it seems, the very merit of women turns into its opposite: predestined damnation.`,
+    book: "Understanding ISLAM through HADĪS - Religious faith or fanaticism",
+    author: "Ram Swarup",
+    page: 24,
+    tags: ["Islam", "Hadis", "Hadith"],
+    comments: "",
+  },
 ];
 
 const videoData = [

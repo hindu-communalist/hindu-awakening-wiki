@@ -1,4 +1,4 @@
-const quoteData = [
+export const quoteData = [
   {
     quote: `The real reason for floating the myth of virgin birth seems to be that
 “there had always been a question mark hanging over Mary’s sexual
@@ -260,7 +260,7 @@ wording in order to make it yield the meaning they require.”`,
   },
 ];
 
-const videoData = [
+export const videoData = [
   {
     title: "रायगड दर्शन (भाग २) - इतिहासतज्ञ श्री. अप्पा परबांसोबत",
     videoId: "KXZZrolKsD0",
